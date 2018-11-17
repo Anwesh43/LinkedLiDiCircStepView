@@ -219,4 +219,12 @@ class LiDiCircStepView(ctx : Context) : View(ctx) {
             }
         }
     }
+
+    companion object {
+        fun create(activity : Activity) : LiDiCircStepView {
+            val view : LiDiCircStepView = LiDiCircStepView(activity)
+            activity.setContentView(view)
+            return view
+        }
+    }
 }
