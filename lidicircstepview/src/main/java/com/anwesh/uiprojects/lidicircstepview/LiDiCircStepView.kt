@@ -194,4 +194,27 @@ class LiDiCircStepView(ctx : Context) : View(ctx) {
             }
         }
     }
+
+    data class Renderer(var view : LiDiCircStepView) {
+
+        private val animator : Animator = Animator(view)
+
+        private val ldcs : LiDiCircStep = LiDiCircStep(0)
+
+        fun render(canvas : Canvas, paint : Paint) {
+            canvas.drawColor(BACK_COLOR)
+            ldcs.draw(canvas, paint)
+            animator.animate {
+                ldcs.update {i, scl ->
+                    animator.stop()
+                }
+            }
+        }
+
+        fun handleTap() {
+            ldcs.startUpdating {
+                animator.start()
+            }
+        }
+    }
 }
