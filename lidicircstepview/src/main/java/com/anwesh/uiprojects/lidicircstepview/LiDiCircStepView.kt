@@ -22,17 +22,19 @@ val COLOR : Int = Color.parseColor("#01579B")
 val BACK_COLOR : Int = Color.parseColor("#BDBDBD")
 val DELAY : Long = 30
 val scGap : Float = 0.1f / 2
-val rFactor : Int = 10
+val rFactor : Int = 6
+val arcStartDeg : Float = 180f
+val gapDeg : Float = 360f / lines
 
 fun Int.getInverse() : Float = 1f / this
 
-fun Float.divideScale(i : Int, n : Int) : Float = Math.min(n.getInverse(), Math.max(0f, this - n.getInverse() * i))
+fun Float.divideScale(i : Int, n : Int) : Float = Math.min(n.getInverse(), Math.max(0f, this - n.getInverse() * i)) * n
 
 fun Float.getScaleFactor() : Float = Math.floor(this / 0.51).toFloat()
 
-fun Float.getMirrorValue(a : Int, b : Int) : Float = (1 - this) * a.getInverse() + this * b.getInverse()
+fun Float.getMirrorValue(a : Int, b : Int) : Float = ((1 - this) * a.getInverse()) + (this * b.getInverse())
 
-fun Float.updateScale(dir : Float, a : Int, b : Int) : Float = dir * scGap + getScaleFactor().getMirrorValue(a, b)
+fun Float.updateScale(dir : Float, a : Int, b : Int) : Float = dir * scGap * getScaleFactor().getMirrorValue(a, b)
 
 fun Canvas.drawLDCNode(i : Int, scale : Float, paint : Paint) {
     val w : Float = width.toFloat()
@@ -46,19 +48,23 @@ fun Canvas.drawLDCNode(i : Int, scale : Float, paint : Paint) {
     paint.style = Paint.Style.STROKE
     val size : Float = gap / SIZE_FACTOR
     val r : Float = size * Math.sqrt(2.0).toFloat() * rFactor.getInverse()
+    val lSize : Float = size - 2 * r
+    save()
+    translate(gap * (i + 1), h / 2)
     for (j in 0..(lines - 1)) {
         val scs : Float = sc1.divideScale(j, lines)
         val scr : Float = sc2.divideScale(j, lines)
-        val degStart : Float = (90f * j + 45f) + 180f
+        val degStart : Float = (gapDeg * j + gapDeg / 2) + arcStartDeg
         save()
-        rotate(90f * j)
-        drawLine(0f, 0f, size * scs, size * scs, paint)
+        rotate(gapDeg * j)
+        drawLine(0f, 0f, lSize * scs, lSize * scs, paint)
         save()
-        translate(size + r, size + r)
+        translate(size - r , size - r)
         drawArc(RectF(-r, -r, r, r), degStart, 360f * scr, false, paint)
         restore()
         restore()
     }
+    restore()
 }
 
 class LiDiCircStepView(ctx : Context) : View(ctx) {
@@ -119,7 +125,7 @@ class LiDiCircStepView(ctx : Context) : View(ctx) {
 
         fun draw(canvas : Canvas, paint : Paint) {
             canvas.drawLDCNode(i, state.scale, paint)
-            next?.draw(canvas, paint)
+            prev?.draw(canvas, paint)
         }
 
         fun update(cb : (Int, Float) -> Unit) {
