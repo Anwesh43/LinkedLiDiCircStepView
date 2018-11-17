@@ -12,6 +12,7 @@ import android.graphics.Color
 import android.graphics.RectF
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 
 val nodes : Int = 5
 val lines : Int = 4
@@ -54,7 +55,7 @@ fun Canvas.drawLDCNode(i : Int, scale : Float, paint : Paint) {
         drawLine(0f, 0f, size * scs, size * scs, paint)
         save()
         translate(size + r, size + r)
-        drawArc(RectF(-r, -r, r, r), degStart, 360f * scr, false, true)
+        drawArc(RectF(-r, -r, r, r), degStart, 360f * scr, false, paint)
         restore()
         restore()
     }
@@ -75,5 +76,27 @@ class LiDiCircStepView(ctx : Context) : View(ctx) {
             }
         }
         return true
+    }
+
+    data class State(var scale : Float = 0f, var prevScale : Float = 0f, var dir : Float = 0f) {
+
+        fun update(cb : (Float) -> Unit) {
+            val k : Float = scale.updateScale(dir, lines, lines)
+            scale += k
+            Log.d("updated scale by", "$k")
+            if (Math.abs(scale - prevScale) > 1) {
+                scale = prevScale + dir
+                dir = 0f
+                prevScale = scale
+                cb(prevScale)
+            }
+        }
+
+        fun startUpdating(cb : () -> Unit) {
+            if (dir == 0f) {
+                dir = 1f - 2 * prevScale
+                cb()
+            }
+        }
     }
 }
