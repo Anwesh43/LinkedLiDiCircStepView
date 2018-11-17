@@ -54,7 +54,7 @@ fun Canvas.drawLDCNode(i : Int, scale : Float, paint : Paint) {
     for (j in 0..(lines - 1)) {
         val scs : Float = sc1.divideScale(j, lines)
         val scr : Float = sc2.divideScale(j, lines)
-        val degStart : Float = (gapDeg * j + gapDeg / 2) + arcStartDeg
+        val degStart : Float = (gapDeg / 2) + arcStartDeg
         save()
         rotate(gapDeg * j)
         drawLine(0f, 0f, lSize * scs, lSize * scs, paint)
